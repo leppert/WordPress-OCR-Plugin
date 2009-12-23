@@ -39,20 +39,48 @@ class OCR {
 		$image_path = $upload_dir.'/'.get_post_meta($image_id, '_wp_attached_file', true);
 		$temp_image = $upload_dir.'/ocr_image.tif';
 		$temp_text 	= $upload_dir.'/ocr_text';
-		$command 	= '/opt/local/bin/convert -resize 200% '.$image_path.' '.$temp_image.' && /opt/local/bin/tesseract '.$temp_image.' '.$temp_text.' && cat '.$temp_text.'.txt && rm -f '.$temp_text.'.txt '.$temp_image;
+		$command 	= get_option('imagemagick_path').' -resize 200% '.$image_path.' '.$temp_image.' && '.get_option('tesseract_path').' '.$temp_image.' '.$temp_text.' && cat '.$temp_text.'.txt && rm -f '.$temp_text.'.txt '.$temp_image;
 		$ocr_text 	= shell_exec($command);
 		add_post_meta( $image_id, 'ocr_text', $ocr_text, true );
 	}
 	
 	function SubMenuItem(){
-		add_submenu_page('plugins.php', 'OCR Plugin Configuration', 'OCR Plugin', 8, __FILE__, array( $this, 'SettingsPage' ) );
+		add_submenu_page( 'plugins.php', 'OCR Plugin Configuration', 'OCR Plugin', 'administrator', __FILE__, array( $this, 'SettingsPage' ) );
+		add_action( 'admin_init', array( $this, 'RegisterSettings' ) );
+	}
+	
+	function RegisterSettings() {
+		//register our settings
+		register_setting( 'ocr-settings-group', 'imagemagick_path' );
+		register_setting( 'ocr-settings-group', 'tesseract_path' );
 	}
 	
 	function SettingsPage(){
-		echo '<div class="wrap">';
-		echo '<p>Here is where the form would go if I actually had options.</p>';
-		echo '</div>';
-	}
+	?>
+	<div class="wrap">
+	<h2>OCR Settings</h2>
+
+	<form method="post" action="options.php">
+	    <?php settings_fields( 'ocr-settings-group' ); ?>
+	    <table class="form-table">
+	        <tr valign="top">
+	        <th scope="row">Absolute Path to <a target="_blank" href="http://www.imagemagick.org">ImageMagick's</a> <a target="_blank" href="http://www.imagemagick.org/script/convert.php">convert</a><br><i style="font-size:10px;">(ex: /opt/local/bin/convert)</i></th>
+	        <td><input type="text" name="imagemagick_path" value="<?php echo get_option('imagemagick_path'); ?>" /></td>
+	        </tr>
+
+	        <tr valign="top">
+	        <th scope="row">Absolute Path to <a target="_blank" href="http://code.google.com/p/tesseract-ocr/">Tesseract</a><br><i style="font-size:10px;">(ex: /opt/local/bin/tesseract)</i></th>
+	        <td><input type="text" name="tesseract_path" value="<?php echo get_option('tesseract_path'); ?>" /></td>
+	        </tr>
+	    </table>
+
+	    <p class="submit">
+	    <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
+	    </p>
+
+	</form>
+	</div>
+	<?php }
 }
 
 if(!$ocr_plugin){ $ocr_plugin = new OCR(); }
