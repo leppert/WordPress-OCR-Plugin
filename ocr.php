@@ -83,7 +83,7 @@ class OCR {
 			<h2>OCR Plugin Settings</h2>
 			<p>
 				The OCR Plugin requires PHP5 and two command line utilities: <a target="_blank" href="http://www.imagemagick.org">ImageMagick</a> for preparing the images and <a target="_blank" href="http://code.google.com/p/tesseract-ocr/">Tesseract</a> for the actual OCR.
-				These utilities must be installed on your server manually and executable by PHP. This process, and consequently this plugin, is recommended only for advanced users.
+				These utilities must be manually installed on your server and executable by PHP. This process, and consequently this plugin, is recommended only for advanced users.
 			</p>
 			<form method="post" action="options.php">
 			    <?php settings_fields( 'ocr-settings-group' ); ?>
