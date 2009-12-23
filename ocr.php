@@ -35,7 +35,9 @@
 class OCR {
 	
 	function __construct(){
-		register_uninstall_hook( __FILE__, array( $this, 'Uninstall' ) );
+		if ( function_exists('register_uninstall_hook') ){
+			register_uninstall_hook( __FILE__, array( $this, 'Uninstall' ) );
+		}
 		
 		add_action( 'add_attachment', 	array( $this, 'AnalyzeImage' ) );
 		add_action( 'admin_menu', 		array( $this, 'SubMenuItem' ) );
