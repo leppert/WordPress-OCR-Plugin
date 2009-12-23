@@ -38,11 +38,16 @@ class OCR {
 		$upload_dir = $upload_dir['basedir'];
 		$image_path = $upload_dir.'/'.get_post_meta($image_id, '_wp_attached_file', true);
 		if(getimagesize($image_path)){ //only go through the steps for OCR if the file is an image
-			$temp_image = $upload_dir.'/ocr_image.tif'; //tesseract requires a tiff
-			$temp_text 	= $upload_dir.'/ocr_text';
-			$command 	= get_option('ocr_imagemagick_path').' -resize '.get_option('ocr_resize_amount').'% '.$image_path.' '.$temp_image.' && '.get_option('ocr_tesseract_path').' '.$temp_image.' '.$temp_text.' && cat '.$temp_text.'.txt && rm -f '.$temp_text.'.txt '.$temp_image;
-			$ocr_text 	= shell_exec($command);
-			add_post_meta( $image_id, 'ocr_text', $ocr_text, true );
+			$imagemagick 	= get_option('ocr_imagemagick_path');
+			$tesseract		= get_option('ocr_tesseract_path');
+			$size_percent	= get_option('ocr_resize_percent');
+			if($imagemagick && $tesseract && $size_percent){ //only analyze the image if the plugin configuration has been filled in
+				$temp_image = $upload_dir.'/ocr_image.tif'; //tesseract requires a tiff
+				$temp_text 	= $upload_dir.'/ocr_text';
+				$command 	= $imagemagick.' -resize '.$size_percent.'% '.$image_path.' '.$temp_image.' && '.$tesseract.' '.$temp_image.' '.$temp_text.' && cat '.$temp_text.'.txt && rm -f '.$temp_text.'.txt '.$temp_image;
+				$ocr_text 	= shell_exec($command);
+				add_post_meta( $image_id, 'ocr_text', $ocr_text, true );
+			}
 		}
 	}
 	
@@ -54,13 +59,17 @@ class OCR {
 	function RegisterSettings() {
 		register_setting( 'ocr-settings-group', 'ocr_imagemagick_path' );
 		register_setting( 'ocr-settings-group', 'ocr_tesseract_path' );
-		register_setting( 'ocr-settings-group', 'ocr_resize_amount' );
+		register_setting( 'ocr-settings-group', 'ocr_resize_percent' );
 	}
 	
 	function SettingsPage(){
 		?>
 		<div class="wrap">
 			<h2>OCR Settings</h2>
+			<p>
+				The OCR Plugin requires two command line utilities: <a target="_blank" href="http://www.imagemagick.org">ImageMagick</a> for preparing the images and <a target="_blank" href="http://code.google.com/p/tesseract-ocr/">Tesseract</a> for the actual OCR.
+				These utilities must be installed on your server manually and executable by PHP. This process, and consequently this plugin, is recommended only for advanced users.
+			</p>
 			<form method="post" action="options.php">
 			    <?php settings_fields( 'ocr-settings-group' ); ?>
 			    <table class="form-table">
@@ -74,7 +83,7 @@ class OCR {
 			    	</tr>
 			    	<tr valign="top">
 			    		<th scope="row">Resize percentage<br><i style="font-size:10px;">A higher % might lead to more accurate OCR but will take longer to calculate. Default = 200%</i></th>
-			    		<td><input type="text" name="ocr_resize_amount" value="<?php echo get_option('ocr_resize_amount'); ?>" />%</td>
+			    		<td><input type="text" name="ocr_resize_percent" value="<?php echo get_option('ocr_resize_percent'); ?>" />%</td>
 			    	</tr>
 			    </table>
 			    <p class="submit">
@@ -89,3 +98,4 @@ class OCR {
 if(!$ocr_plugin){ $ocr_plugin = new OCR(); }
 add_action( 'add_attachment', 	array( $ocr_plugin, 'AnalyzeImage' ) );
 add_action( 'admin_menu', 		array( $ocr_plugin, 'SubMenuItem' ) );
+add_option( 'ocr_resize_percent', 200 ); //set the default value for the resize percent
