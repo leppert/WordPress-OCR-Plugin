@@ -35,6 +35,8 @@
 class OCR {
 	
 	function __construct(){
+		register_uninstall_hook( __FILE__, array( $this, 'Uninstall' ) );
+		
 		add_action( 'add_attachment', 	array( $this, 'AnalyzeImage' ) );
 		add_action( 'admin_menu', 		array( $this, 'SubMenuItem' ) );
 
@@ -122,10 +124,16 @@ class OCR {
 	}
 	
 	function SaveOCRText($post, $attachment){
-		if($attachment['ocr_text']){
+		if ( isset($attachment['ocr_text']) && !empty($attachment['ocr_text']) ) {
 			update_post_meta($post['ID'], 'ocr_text', $attachment['ocr_text']);
 		}
 		return $post;
+	}
+	
+	function Uninstall(){
+		delete_option( 'ocr_imagemagick_path' );
+		delete_option( 'ocr_tesseract_path' );
+		delete_option( 'ocr_resize_percent' );
 	}
 }
 
