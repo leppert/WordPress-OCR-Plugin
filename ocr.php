@@ -33,6 +33,17 @@
  */
 
 class OCR {
+	
+	function __construct(){
+		add_action( 'add_attachment', 	array( $this, 'AnalyzeImage' ) );
+		add_action( 'admin_menu', 		array( $this, 'SubMenuItem' ) );
+
+		add_filter( 'attachment_fields_to_edit', array( $this, 'EditOCRText' ), 10, 2);
+		add_filter( 'attachment_fields_to_save', array( $this, 'SaveOCRText' ), 10, 2);
+
+		add_option( 'ocr_resize_percent', 200 ); //set the default value for the resize percent
+	}
+	
 	function AnalyzeImage($image_id){
 		$upload_dir = wp_upload_dir();
 		$upload_dir = $upload_dir['basedir'];
@@ -93,9 +104,29 @@ class OCR {
 		</div>
 		<?php
 	}
+	
+	function EditOCRText( $form_fields, $post ){
+		if ( substr($post->post_mime_type, 0, 5) == 'image' ) {
+			$ocr_text = get_post_meta($post->ID, 'ocr_text', true);
+			if ( empty($ocr_text) )
+				$ocr_text = '';
+
+			$form_fields['ocr_text'] = array(
+				'value' => $ocr_text,
+				'label' => __('OCR Text'),
+				'helps' => __('Text automatically pulled from the image via the OCR plugin.'),
+				'input' => 'textarea'
+			);
+		}
+		return $form_fields;
+	}
+	
+	function SaveOCRText($post, $attachment){
+		if($attachment['ocr_text']){
+			update_post_meta($post['ID'], 'ocr_text', $attachment['ocr_text']);
+		}
+		return $post;
+	}
 }
 
 if(!$ocr_plugin){ $ocr_plugin = new OCR(); }
-add_action( 'add_attachment', 	array( $ocr_plugin, 'AnalyzeImage' ) );
-add_action( 'admin_menu', 		array( $ocr_plugin, 'SubMenuItem' ) );
-add_option( 'ocr_resize_percent', 200 ); //set the default value for the resize percent
