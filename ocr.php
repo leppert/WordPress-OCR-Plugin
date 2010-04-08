@@ -5,7 +5,7 @@
  *     Plugin Name:  OCR
  *     Plugin URI:   http://formasfunction.com/code/wordpress/ocr
  *     Description:  A plugin for extracting the text from attached images using OCR via tesseract
- *     Version:      0.01
+ *     Version:      0.1.0
  *     Author:       Greg Leppert
  *     Author URI:   http://formasfunction.com
  *
@@ -13,7 +13,7 @@
  *
  *    This is the required license information for a Wordpress plugin.
  *
- *    Copyright 2009  Greg Leppert  (email : greg@formasfunction.com)
+ *    Copyright 2009  Greg Leppert  (email : function@formasfunction.com)
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ class OCR {
 	}
 	
 	function SubMenuItem(){
-		add_submenu_page( 'plugins.php', 'OCR Plugin Configuration', 'OCR Plugin', 'administrator', __FILE__, array( $this, 'SettingsPage' ) );
+		add_submenu_page( 'plugins.php', 'OCR Configuration', 'OCR', 'administrator', __FILE__, array( $this, 'SettingsPage' ) );
 		add_action( 'admin_init', array( $this, 'RegisterSettings' ) );
 	}
 	
@@ -80,9 +80,9 @@ class OCR {
 	function SettingsPage(){
 		?>
 		<div class="wrap">
-			<h2>OCR Plugin Settings</h2>
+			<h2>OCR Settings</h2>
 			<p>
-				The OCR Plugin requires PHP5 and two command line utilities: <a target="_blank" href="http://www.imagemagick.org">ImageMagick</a> for preparing the images and <a target="_blank" href="http://code.google.com/p/tesseract-ocr/">Tesseract</a> for the actual OCR.
+				The OCR plugin requires PHP5 and two command line utilities: <a target="_blank" href="http://www.imagemagick.org">ImageMagick</a> for preparing the images and <a target="_blank" href="http://code.google.com/p/tesseract-ocr/">Tesseract</a> for the actual OCR.
 				These utilities must be manually installed on your server and executable by PHP. This process, and consequently this plugin, is recommended only for advanced users.
 			</p>
 			<form method="post" action="options.php">
